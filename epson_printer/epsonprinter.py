@@ -124,7 +124,7 @@ class PrintableImage:
         pixels = np.vstack((pixels, extra_pixels))
         h += extra_rows
         nb_stripes = h / 24
-        pixels = pixels.reshape(nb_stripes, 24, w).swapaxes(1, 2).reshape(-1, 8)
+        pixels = pixels.reshape(int(nb_stripes), 24, w).swapaxes(1, 2).reshape(-1, 8)
 
         nh = int(w / 256)
         nl = w % 256

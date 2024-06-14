@@ -6,7 +6,7 @@ A python library to control thermal printers based on the ESC/POS language as de
 ### Installation
 Clone the project
 ```
-git clone https://github.com/benoitguigal/python-epson-printer.git
+git clone https://github.com/cafeciaojoe/python-epson-printer
 ```
 Install dependencies
 ```
@@ -20,8 +20,28 @@ Bus 001 Device 005: ID 04b8:0e03 Seiko Epson Corp.
 ```
 Write down the vendor_id and the product_id and pass them as arguments to the test page
 ```
-sudo python -m epson_printer.testpage -v 0x04b8 -p 0x0e03
+sudo python -m epson_printer.testpage -v 0x04b8 -p 0x0202
 ```
+### note
+numpy needed to be installed manually with pip in the conda environment
+```
+pip install numpy
+```
+
+pyusb needed to be installed manually with conda-forge in the conda environment
+```
+conda install -c conda-forge pyusb
+```
+
+If the backend is still not found, you may need to set the LIBUSB_PATH environment variable to point to the libusb library.
+```
+find / -name "libusb-1.0.so" 2>/dev/null
+```
+
+kagi coda assistant was guiding me thru this. 
+
+
+
 
 
 ### Devices
