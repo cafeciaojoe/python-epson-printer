@@ -8,6 +8,10 @@ if __name__ == '__main__':
     parser.add_option("-v", "--idvendor", action="store", type="int", dest="id_vendor", help="The printer vendor id")
     parser.add_option("-p", "--idProduct", action="store", type="int", dest="id_product", help="The printer product id")
     options, args = parser.parse_args()
+    print(options.id_vendor)
+    print(type(options.id_vendor))
+    print(options.id_product)
+    print(type(options.id_product))
     if not options.id_vendor or not options.id_product:
         parser.print_help()
     else:
