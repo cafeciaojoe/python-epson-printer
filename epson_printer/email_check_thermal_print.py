@@ -20,13 +20,15 @@ def thermal_print(subject,body):
     formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", current_time)
     printer.print_text(formatted_time)
     printer.linefeed()
+    # TODO add the senters name and email address.
     printer.print_text('Subject: ')
     printer.print_text(subject)
     printer.linefeed()
     printer.print_text('Message: ')
     printer.print_text(body)
     printer.linefeed(5)
-    #printer.print_image_from_file("attachment.png")
+    # TODO have it print emailed attachments, current can only print this lo res png form the root directory
+    #printer.print_image_from_file(image)
     printer.linefeed(10)
     printer.cut()
     pass
@@ -132,8 +134,14 @@ for email_id in email_ids:
     print("Body:", body)
     print("="*50)  # Separator between emails
 
+    # TODO: passing the file path into this funciton is a good way to print it, but the images are too large atm.
     thermal_print(subject,body)
     # print("="*50)  # Separator between emails
+
+    # TODO: once images has been printed delete the file.
+    # Optionally, delete the image after displaying
+    # os.remove(filepath)
+
 
 
 # Logout and close the connection
