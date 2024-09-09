@@ -37,9 +37,6 @@ conda install -c conda-forge pyusb
 kagi code assistant was guiding me thru this. 
 
 
-
-
-
 ### Devices
 The library should work with all ESC/POS-based Epson printers but it has only been tested with a TM-T20. If you have tested
 the library with a different model, please add it to the [list of supported printers](https://github.com/benoitguigal/python-epson-printer/wiki/List-of-supported-printers)

@@ -45,26 +45,35 @@ class PrintableImage:
     @classmethod
     def from_image(cls, image):
         (w, h) = image.size
+
         if w > 512:
             ratio = 512. / w
             h = int(h * ratio)
             image = image.resize((512, h), Image.ANTIALIAS)
         if image.mode != '1':
             image = image.convert('1')
+
         pixels = np.array(list(image.getdata())).reshape(h, w)
+
         extra_rows = int(math.ceil(h / 24)) * 24 - h
         extra_pixels = np.ones((extra_rows, w), dtype=bool)
         pixels = np.vstack((pixels, extra_pixels))
         h += extra_rows
-        nb_stripes = h // 24
-        pixels = pixels.reshape(nb_stripes, 24, w).swapaxes(1, 2).reshape(-1, 8)
-        pixels = np.invert(np.packbits(pixels))
+        nb_stripes = h / 24
+        pixels = pixels.reshape(int(nb_stripes), 24, w).swapaxes(1, 2).reshape(-1, 8)
+
+        nh = int(w / 256)
+        nl = w % 256
         data = []
+
+        pixels = np.invert(np.packbits(pixels))
         stripes = np.split(pixels, nb_stripes)
+
         for stripe in stripes:
-            data.extend([ESC, 42, 33, w % 256, w // 256])
+            data.extend([ESC, 42, 33, nl, nh])
             data.extend(stripe)
             data.extend([27, 74, 48])
+
         height = h * 2
         return cls(data, height)
 
@@ -76,14 +85,17 @@ class PrintableImage:
 class EpsonPrinter:
     def __init__(self, id_vendor, id_product, out_ep=0x01):
         self.out_ep = out_ep
+
         self.printer = usb.core.find(idVendor=id_vendor, idProduct=id_product)
         if self.printer is None:
             raise ValueError("Printer not found. Make sure the cable is plugged in.")
+
         if self.printer.is_kernel_driver_active(0):
             try:
                 self.printer.detach_kernel_driver(0)
             except usb.core.USBError as e:
                 print("Could not detach kernel driver: %s" % str(e))
+
         try:
             self.printer.set_configuration()
             self.printer.reset()
@@ -98,6 +110,11 @@ class EpsonPrinter:
         return wrapper
 
     def write_bytes(self, byte_array):
+        # Old code:
+        # msg = ''.join([chr(b) for b in byte_array])
+        # self.write(msg)
+
+        # New code:
         self.printer.write(self.out_ep, byte_array, timeout=20000)
 
     def write(self, msg):
@@ -118,10 +135,13 @@ class EpsonPrinter:
     def print_image(self, printable_image):
         dyl = printable_image.height % 256
         dyh = int(printable_image.height / 256)
+
         byte_array = [ESC, 87, 46, 0, 0, 0, 0, 2, dyl, dyh]
+
         byte_array.extend([27, 76])
         byte_array.extend(printable_image.data)
         byte_array.append(12)
+
         return byte_array
 
     def print_images(self, *printable_images):
