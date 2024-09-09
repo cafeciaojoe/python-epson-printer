@@ -38,37 +38,91 @@ def set_print_speed(speed):
     return [GS, 40, 75, 2, 0, 50, speed]
 
 class PrintableImage:
+    MAX_WIDTH = 440  # Define the maximum width as a class attribute
+    OFFSET = -200       # Define the offset as a class attribute
+
     def __init__(self, data, height):
         self.data = data
         self.height = height
 
     @classmethod
     def from_image(cls, image):
+        # Get the original dimensions of the image
         (w, h) = image.size
-        if w > 512:
-            ratio = 512. / w
-            h = int(h * ratio)
-            image = image.resize((512, h), Image.ANTIALIAS)
+        print(f"Original image size: width={w}, height={h}!!!!!")
+
+        # Resize the image if its width is greater than the maximum width
+        if w > cls.MAX_WIDTH:
+            ratio = cls.MAX_WIDTH / w  # Calculate the scaling ratio to resize the width to MAX_WIDTH
+            h = int(h * ratio)  # Adjust the height to maintain the aspect ratio
+            image = image.resize((cls.MAX_WIDTH, h), Image.ANTIALIAS)
+            print(f"Resized image size: width={cls.MAX_WIDTH}, height={h}")
+            w = cls.MAX_WIDTH  # Update the width after resizing
+
+        # Convert the image to black and white mode if it is not already
         if image.mode != '1':
             image = image.convert('1')
-        pixels = np.array(list(image.getdata())).reshape(h, w)
+            print("Converted image to mode '1' (black and white)")
+
+        # Convert the image data to a numpy array
+        pixels = np.array(list(image.getdata()))
+        print(f"Total number of pixels: {pixels.size}")
+
+        try:
+            pixels = pixels.reshape(h, w)
+            print(f"Reshaped pixels to: height={h}, width={w}")
+        except ValueError as e:
+            print(f"Error reshaping pixels: {e}")
+            raise
+
+        # Calculate the padding needed to center the image
+        total_width = cls.MAX_WIDTH  # Total width of the printable area
+        if w < total_width:
+            padding_left = max((total_width - w) // 2 + cls.OFFSET, 0)
+            padding_right = total_width - w - padding_left
+            # Add padding to the left and right
+            print(f"Padding: left={padding_left}, right={padding_right}")
+            padded_pixels = np.pad(pixels, ((0, 0), (padding_left, padding_right)), 'constant', constant_values=1)
+            pixels = padded_pixels
+            w = total_width  # Update the width to the total width
+            print(f"New width after padding: {w}")
+
+        # Calculate the number of extra rows needed to make the height a multiple of 24
         extra_rows = int(math.ceil(h / 24)) * 24 - h
+        print(f"Extra rows needed to make height a multiple of 24: {extra_rows}")
+
+        # Create extra rows filled with white pixels (represented by True)
         extra_pixels = np.ones((extra_rows, w), dtype=bool)
+
+        # Add the extra rows to the pixel array
         pixels = np.vstack((pixels, extra_pixels))
-        h += extra_rows
+        h += extra_rows  # Update the height to include the extra rows
+        print(f"Adjusted image size with extra rows: height={h}")
+
+        # Calculate the number of stripes (each stripe is 24 pixels high)
         nb_stripes = h // 24
+        print(f"Number of stripes (24 pixels each): {nb_stripes}")
+
+        # Reshape the pixel array into stripes, then invert and pack the bits
         pixels = pixels.reshape(nb_stripes, 24, w).swapaxes(1, 2).reshape(-1, 8)
         pixels = np.invert(np.packbits(pixels))
+
         data = []
+        # Split the pixel array into individual stripes
         stripes = np.split(pixels, nb_stripes)
         for stripe in stripes:
+            # Add the ESC/POS command to print a stripe
             data.extend([ESC, 42, 33, w % 256, w // 256])
+            # Add the stripe data
             data.extend(stripe)
+            # Add the ESC/POS command to feed paper
             data.extend([27, 74, 48])
-        height = h * 2
-        return cls(data, height)
+
+        height = h * 2  # Calculate the total height in printer units
+        return cls(data, height)  # Create and return a PrintableImage object
 
     def append(self, other):
+        # Append another PrintableImage's data to this one
         self.data.extend(other.data)
         self.height += other.height
         return self

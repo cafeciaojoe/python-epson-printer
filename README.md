@@ -11,7 +11,8 @@ git clone https://github.com/cafeciaojoe/python-epson-printer
 Install dependencies
 ```
 cd python-epson-printer
-sudo python setup.py install
+pip install -e .
+
 ```
 Connect your EPSON thermal printer via a USB port and run
 ```
@@ -23,18 +24,14 @@ Write down the vendor_id and the product_id and pass them as arguments to the te
 sudo python -m epson_printer.testpage -v 0x04b8 -p 0x0202
 ```
 ### note
-numpy and pillow needed to be installed manually with pip in the conda environment
-```
-pip install numpy
-pip install pillow
-```
 
-pyusb needed to be installed manually with conda-forge in the conda environment
+pyusb needed to be installed manually with conda-forge if you are using a conda environment
 ```
 conda install -c conda-forge pyusb
 ```
-
 kagi code assistant was guiding me thru this. 
+
+
 
 
 ### Devices
@@ -57,7 +54,7 @@ the library with a different model, please add it to the [list of supported prin
 * print arbitrary long bitmap pixels array
 
 ##### Hardware commands
-* full paper cut
+* full paper cut (you have to feed at least 10 lines before it will cut, see testpage.py)
 
 
 
