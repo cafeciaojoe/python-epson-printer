@@ -23,9 +23,10 @@ Write down the vendor_id and the product_id and pass them as arguments to the te
 sudo python -m epson_printer.testpage -v 0x04b8 -p 0x0202
 ```
 ### note
-numpy needed to be installed manually with pip in the conda environment
+numpy and pillow needed to be installed manually with pip in the conda environment
 ```
 pip install numpy
+pip install pillow
 ```
 
 pyusb needed to be installed manually with conda-forge in the conda environment
@@ -33,12 +34,7 @@ pyusb needed to be installed manually with conda-forge in the conda environment
 conda install -c conda-forge pyusb
 ```
 
-If the backend is still not found, you may need to set the LIBUSB_PATH environment variable to point to the libusb library.
-```
-find / -name "libusb-1.0.so" 2>/dev/null
-```
-
-kagi coda assistant was guiding me thru this. 
+kagi code assistant was guiding me thru this. 
 
 
 
