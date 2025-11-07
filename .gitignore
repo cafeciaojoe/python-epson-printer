@@ -1,7 +1,8 @@
 # files
 epson_printer/credentials.py
 
-.idea/*
+
+.idea/
 dist
 eggs
 *.egg-info
@@ -9,3 +10,5 @@ build
 *.pyc
 *.pyo
 virtualenv
+.vscode/
+.checklists/

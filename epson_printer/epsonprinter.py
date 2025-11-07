@@ -49,7 +49,7 @@ class PrintableImage:
     def from_image(cls, image):
         # Get the original dimensions of the image
         (w, h) = image.size
-        print(f"Original image size: width={w}, height={h}!!!!!")
+        print(f"Original image size: width={w}, height={h}")
 
         # Resize the image if its width is greater than the maximum width
         if w > cls.MAX_WIDTH:
