@@ -4,18 +4,20 @@ from PIL import Image, ImageDraw
 from .epsonprinter import EpsonPrinter
 
 # Parameters for the maze
-MAZE_SIZE = 21  # Size of the maze (must be an odd number for proper walls)
-CELL_SIZE = 200  # Size of each cell in pixels
+MAZE_SIZE = 15  # Number of cells along the shorter side of the maze (must be an odd number for proper walls)
+RATIO = 1  # Aspect ratio of the maze (width = MAZE_SIZE * RATIO, height = MAZE_SIZE)
+CELL_SIZE = 4  # Size of each cell in pixels (affects the visual size of the maze)
 NUM_LOOPS = 5  # Number of random loops to add to the maze
 
-def generate_recursive_backtracking_maze(size):
+def generate_recursive_backtracking_maze(width, height):
     """
     Generate a maze using the Recursive Backtracking algorithm.
-    :param size: Size of the maze grid (must be an odd number).
+    :param width: Number of cells in the maze's width.
+    :param height: Number of cells in the maze's height.
     :return: A 2D list representing the maze (0 = wall, 1 = path).
     """
     # Initialize the grid with walls
-    maze = [[0 for _ in range(size)] for _ in range(size)]
+    maze = [[0 for _ in range(width)] for _ in range(height)]
 
     # Define the directions for moving (right, down, left, up)
     directions = [(0, 2), (2, 0), (0, -2), (-2, 0)]
@@ -26,7 +28,7 @@ def generate_recursive_backtracking_maze(size):
         random.shuffle(directions)  # Shuffle directions for randomness
         for dx, dy in directions:
             nx, ny = x + dx, y + dy
-            if 0 < nx < size - 1 and 0 < ny < size - 1 and maze[ny][nx] == 0:
+            if 0 < nx < width - 1 and 0 < ny < height - 1 and maze[ny][nx] == 0:
                 # Carve a passage between the current cell and the next cell
                 maze[y + dy // 2][x + dx // 2] = 1
                 carve_passages(nx, ny)
@@ -36,7 +38,7 @@ def generate_recursive_backtracking_maze(size):
 
     # Add start and end points
     maze[1][0] = 1  # Start point (top-left, just outside the maze)
-    maze[size - 2][size - 1] = 1  # End point (bottom-right, just outside the maze)
+    maze[height - 2][width - 1] = 1  # End point (bottom-right, just outside the maze)
 
     return maze
 
@@ -46,23 +48,26 @@ def add_loops(maze, num_loops):
     :param maze: The 2D list representing the maze (0 = wall, 1 = path).
     :param num_loops: Number of random walls to break.
     """
-    size = len(maze)
+    height = len(maze)
+    width = len(maze[0])
     for _ in range(num_loops):
         # Pick a random wall to break
-        x = random.randint(1, size - 2)
-        y = random.randint(1, size - 2)
+        x = random.randint(1, width - 2)
+        y = random.randint(1, height - 2)
         if maze[y][x] == 0:  # Only break walls
             maze[y][x] = 1
 
-def maze_to_image(maze, cell_size):
+def maze_to_image(maze, cell_size, ratio):
     """
     Convert a maze grid to a PIL Image.
     :param maze: 2D list representing the maze (0 = wall, 1 = path).
     :param cell_size: Size of each cell in pixels.
+    :param ratio: Aspect ratio of the maze (used to determine rotation).
     :return: A PIL Image object of the maze.
     """
-    size = len(maze) * cell_size
-    image = Image.new("1", (size, size), 1)  # Create a white image
+    width = len(maze[0]) * cell_size
+    height = len(maze) * cell_size
+    image = Image.new("1", (width, height), 1)  # Create a white image
     draw = ImageDraw.Draw(image)
 
     for y, row in enumerate(maze):
@@ -72,6 +77,10 @@ def maze_to_image(maze, cell_size):
                 x1, y1 = x0 + cell_size, y0 + cell_size
                 draw.rectangle([x0, y0, x1, y1], fill=0)
 
+    # Rotate the image if the ratio is greater than 1
+    if ratio > 1:
+        image = image.transpose(Image.ROTATE_90)
+
     return image
 
 def main():
@@ -79,15 +88,21 @@ def main():
     ID_VENDOR = 0x04b8  # Replace with your printer's vendor ID
     ID_PRODUCT = 0x0202  # Replace with your printer's product ID
 
+    # Calculate maze dimensions based on the aspect ratio
+    width = int(MAZE_SIZE * RATIO)
+    if width % 2 == 0:
+        width += 1  # Ensure width is odd
+    height = MAZE_SIZE
+
     # Generate the maze
     print("Generating maze...")
-    maze = generate_recursive_backtracking_maze(MAZE_SIZE)
+    maze = generate_recursive_backtracking_maze(width, height)
 
     # Add loops to the maze
     add_loops(maze, NUM_LOOPS)
 
     # Convert the maze to an image
-    maze_image = maze_to_image(maze, CELL_SIZE)
+    maze_image = maze_to_image(maze, CELL_SIZE, RATIO)
 
     # Save the maze as a PNG file
     current_dir = os.path.dirname(os.path.abspath(__file__))
