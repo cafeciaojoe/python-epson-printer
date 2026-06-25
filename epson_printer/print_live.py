@@ -1,5 +1,5 @@
 # Run the following (you can't run this script directly, mac does not give you USB access)
-# sudo python -m epson_printer.checklist -v 0x04b8 -p 0x0202
+# sudo python -m epson_printer.print_live -v 0x04b8 -p 0x0202
 
 from .epsonprinter import EpsonPrinter
 from optparse import OptionParser

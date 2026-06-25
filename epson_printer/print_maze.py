@@ -1,13 +1,17 @@
+# Run the following (you can't run this script directly, mac does not give you USB access)
+# sudo python -m epson_printer.print_maze -v 0x04b8 -p 0x0202
+
+
 import os
 import random
 from PIL import Image, ImageDraw
 from .epsonprinter import EpsonPrinter
 
 # Parameters for the maze
-MAZE_SIZE = 15  # Number of cells along the shorter side of the maze (must be an odd number for proper walls)
-RATIO = 1  # Aspect ratio of the maze (width = MAZE_SIZE * RATIO, height = MAZE_SIZE)
-CELL_SIZE = 4  # Size of each cell in pixels (affects the visual size of the maze)
-NUM_LOOPS = 5  # Number of random loops to add to the maze
+MAZE_SIZE = 55  # Number of cells along the shorter side of the maze (must be an odd number for proper walls)
+RATIO = 3  # Aspect ratio of the maze (width = MAZE_SIZE * RATIO, height = MAZE_SIZE)
+CELL_SIZE = 100  # Size of each cell in pixels (affects the visual size of the maze)
+NUM_LOOPS = 3  # Number of random loops to add to the maze
 
 def generate_recursive_backtracking_maze(width, height):
     """
@@ -109,6 +113,8 @@ def main():
     maze_file = os.path.join(current_dir, "generated_maze.png")
     maze_image.save(maze_file)
     print(f"Maze saved as {maze_file}")
+
+    #exit()
 
     # Initialize the printer
     printer = EpsonPrinter(ID_VENDOR, ID_PRODUCT)

@@ -1,5 +1,5 @@
 # Run the following (you cant run this script direct, mac does not give you usb access)
-# sudo python -m epson_printer.checklist -v 0x04b8 -p 0x0202
+# sudo python -m epson_printer.print_checklist -v 0x04b8 -p 0x0202
 
 from .epsonprinter import EpsonPrinter
 from optparse import OptionParser
@@ -8,6 +8,9 @@ import os
 
 import textwrap
 import re
+
+preprint_space = 4
+postprint_space = 4 #minimum of 4
 
 def format_and_print_checklist(printer, checklist_file):
     import textwrap
@@ -60,7 +63,9 @@ if __name__ == '__main__':
     checklist_file = os.path.join(script_dir, "checklist.txt")
 
     printer = EpsonPrinter(options.id_vendor, options.id_product)
+
+    printer.linefeed(preprint_space)
     format_and_print_checklist(printer, checklist_file)
 
-    printer.linefeed(10)
+    printer.linefeed(postprint_space)
     printer.cut()

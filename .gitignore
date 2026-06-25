@@ -12,3 +12,4 @@ build
 virtualenv
 .vscode/
 .checklists/
+.DS_Store
